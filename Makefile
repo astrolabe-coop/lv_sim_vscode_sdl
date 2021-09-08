@@ -22,6 +22,9 @@ BUILD_DIR			:= $(WORKING_DIR)/obj
 BIN_DIR				:= $(WORKING_DIR)/bin
 UI_DIR 				:= ui
 
+makefiles			?=lvgl/lvgl.mk
+makefiles			+=lv_drivers/lv_drivers.mk
+
 WARNINGS 			:= -Wall -Wextra \
 						-Wshadow -Wundef -Wmaybe-uninitialized -Wmissing-prototypes -Wno-discarded-qualifiers \
 						-Wno-unused-function -Wno-error=strict-prototypes -Wpointer-arith -fno-strict-aliasing -Wno-error=cpp -Wuninitialized \
@@ -54,7 +57,7 @@ OBJECTS    			:= $(patsubst $(SRC_DIR)%,$(BUILD_DIR)/%,$(SRCS:.$(SRC_EXT)=.$(OBJ
 all: ${BIN} ${LIB}
 	ls $^
 
-$(BUILD_DIR)/%.$(OBJ_EXT): $(SRC_DIR)/%.$(SRC_EXT)
+$(BUILD_DIR)/%.$(OBJ_EXT): $(SRC_DIR)/%.$(SRC_EXT) ${makefiles}
 	@echo 'Building project file: $<'
 	@mkdir -p $(dir $@)
 	@$(COMPILE) -c -o "$@" "$<"
@@ -88,3 +91,20 @@ install-headers: ${DESTDIR}/${includedir}/${PROJECT}
 		${sudo} install -vd "$</`dirname $${t}`"; \
 		${sudo} install -v "$${t}" "$</$${t}"; \
 	done
+
+${makefiles}: .gitmodules
+	@echo "info: Preparing sources"
+	git submodule init
+	git submodule update
+	@ls ${makefiles} > $@
+	@echo ""
+	@echo "info: Sources prepared ready to build again"
+	@echo ""
+	@exit 1
+
+prep: ${makefiles}
+	ls $^
+
+run: ${BIN}
+	${<D}/${<F}
+
