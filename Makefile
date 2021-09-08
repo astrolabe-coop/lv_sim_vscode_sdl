@@ -10,7 +10,8 @@ default: all
 # This is done in .vscode/task.json
 #
 PROJECT 			?= lvgl-sdl
-MAKEFLAGS 			:= -j $(shell nproc)
+nproc?=$(shell nproc 2> /dev/null || echo 1)
+MAKEFLAGS 			:= -j ${nproc}
 SRC_EXT      		:= c
 OBJ_EXT				:= o
 LIB_EXT				:= a
